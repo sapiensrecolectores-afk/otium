@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Otium</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+:root {
+  /* Layout: a Roman house. Pompeian-red walls, black-figure bands, ochre gold rules, parchment floors with a tesserae grid;
+     the weekly letter stands in the hero as a small temple front. Single theme by choice. */
+  --red: #7A1E19;
+  --red-deep: #5C1512;
+  --ink: #1B1612;
+  --gold: #D2A04A;
+  --parch: #E8DCC2;
+  --parch-light: #F3EBD8;
+  --stone: #CDBF9F;
+  --text-soft: #4A3F33;
+  --display: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+  --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --wrap: 1120px;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 84px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
+body { margin: 0; background: var(--parch); color: var(--ink); font-family: var(--body); font-size: 18px; line-height: 1.6; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; line-height: 1.08; margin: 0; text-wrap: balance; }
+p { margin: 0; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+.wrap { max-width: var(--wrap); margin: 0 auto; padding-inline: 24px; }
+.eyebrow { font-size: 14px; letter-spacing: 0.26em; text-transform: uppercase; font-weight: 600; color: var(--red); }
+.dark .eyebrow { color: var(--gold); }
+.soft { color: var(--text-soft); }
+.dark .soft { color: #E6D9BD; }
+.frieze { height: 20px; background-color: var(--ink); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='20' viewBox='0 0 24 20'%3E%3Cpath d='M0 18H20V2H6V12H14V7H10' fill='none' stroke='%23D2A04A' stroke-width='2'/%3E%3C/svg%3E"); background-repeat: repeat-x; border-block: 2px solid var(--gold); box-sizing: content-box; }
+.tess { background-color: var(--parch); background-image: linear-gradient(rgba(122, 30, 25, 0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(122, 30, 25, 0.07) 1px, transparent 1px); background-size: 22px 22px; }
+
+/* Header */
+.top { position: sticky; top: 0; z-index: 10; background: var(--ink); color: var(--parch-light); border-bottom: 2px solid var(--gold); }
+.top .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; padding-block: 12px; }
+.brand { font-family: var(--display); font-size: 30px; font-weight: 700; letter-spacing: 0.32em; text-decoration: none; color: var(--gold); }
+.menu-btn { display: none; height: 44px; padding: 0 16px; font: inherit; font-size: 15px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--parch-light); background: transparent; border: 1px solid var(--gold); cursor: pointer; }
+.nav { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 28px; font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; }
+.nav a { text-decoration: none; padding: 10px 0; border-bottom: 2px solid transparent; }
+.nav a:hover { border-bottom-color: var(--gold); }
+.nav a.cta { padding: 10px 20px; background: var(--gold); color: var(--ink); font-weight: 600; border: 0; }
+.nav a.cta:hover { background: #E2B869; }
+@media (max-width: 800px) {
+  .menu-btn { display: block; }
+  .nav { display: none; width: 100%; flex-direction: column; align-items: stretch; gap: 0; padding-bottom: 8px; }
+  .nav.open { display: flex; }
+  .nav a { padding: 12px 0; border-bottom: 1px solid #4A3F33; }
+  .nav a.cta { text-align: center; margin-top: 12px; }
+}
+
+/* Hero */
+.hero { background: radial-gradient(120% 90% at 20% 0%, #8E2A22 0%, var(--red) 45%, var(--red-deep) 100%); color: var(--parch-light); }
+.hero .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 56px 64px; padding-block: 72px 80px; }
+.hero-text { flex: 1 1 440px; display: flex; flex-direction: column; gap: 24px; }
+.inscr { font-family: var(--display); font-size: 17px; letter-spacing: 0.34em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+.hero h1 { font-size: clamp(46px, 6.2vw, 82px); }
+.hero h1 em { font-style: italic; color: var(--gold); }
+.lede { font-size: 21px; max-width: 34em; color: #F0E4CB; }
+
+/* Temple */
+.temple { flex: 1 1 360px; max-width: 480px; display: flex; flex-direction: column; filter: drop-shadow(0 26px 30px rgba(0, 0, 0, 0.45)); }
+.pediment { height: 84px; background: linear-gradient(180deg, #F6EFDD, var(--stone)); clip-path: polygon(50% 0, 100% 100%, 0 100%); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 12px; }
+.pediment span { width: 26px; height: 26px; border-radius: 50%; border: 3px double var(--red); }
+.entab { background: var(--parch-light); border-block: 4px solid var(--stone); padding: 10px 12px; text-align: center; font-family: var(--display); font-weight: 700; font-size: 17px; letter-spacing: 0.3em; color: var(--red); }
+.cella { display: flex; background: var(--parch-light); }
+.col { flex: 0 0 34px; display: flex; flex-direction: column; }
+.col::before, .col::after { content: ""; display: block; margin-inline: -5px; background: linear-gradient(180deg, #F6EFDD, var(--stone)); position: relative; }
+.col::before { height: 18px; border-radius: 9px 9px 2px 2px; }
+.col::after { height: 14px; border-radius: 2px 2px 0 0; }
+.shaft { flex: 1; background: repeating-linear-gradient(90deg, #F6EFDD 0 5px, #BFB08C 5px 7px); }
+.sheet { flex: 1; min-width: 0; padding: 26px 26px 22px; display: flex; flex-direction: column; gap: 14px; color: var(--ink); }
+.sheet h2 { font-size: 32px; }
+.sheet ol { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; }
+.sheet li { display: flex; gap: 14px; padding: 11px 0; border-top: 1px solid var(--stone); }
+.sheet li .n { flex: 0 0 30px; font-family: var(--display); font-size: 22px; font-weight: 700; color: var(--red); }
+.sheet li strong { display: block; font-family: var(--display); font-size: 22px; font-weight: 600; line-height: 1.2; }
+.sheet li small { font-size: 16px; color: var(--text-soft); }
+.step { height: 12px; background: linear-gradient(180deg, #F6EFDD, var(--stone)); }
+.step.two { margin-inline: -14px; }
+@media (max-width: 520px) { .col { display: none; } .step.two { margin-inline: 0; } }
+
+/* Forms */
+.sub { display: flex; flex-direction: column; gap: 10px; }
+.sub-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.sub label { font-size: 14px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; color: var(--parch-light); }
+.sub input { flex: 1 1 240px; min-width: 0; height: 54px; padding: 0 16px; font: inherit; color: var(--ink); background: var(--parch-light); border: 2px solid var(--gold); border-radius: 0; }
+.sub input::placeholder { color: #6B5E4E; }
+.sub button { height: 54px; padding: 0 28px; font: inherit; font-weight: 600; font-size: 16px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink); background: var(--gold); border: 2px solid var(--gold); border-radius: 0; cursor: pointer; }
+.sub button:hover { background: #E2B869; }
+.sub-link { align-self: flex-start; display: inline-flex; align-items: center; min-height: 54px; padding: 0 28px; font-weight: 600; font-size: 16px; letter-spacing: 0.14em; text-transform: uppercase; text-decoration: none; color: var(--ink); background: var(--gold); border: 2px solid var(--gold); }
+.sub-link:hover { background: #E2B869; }
+.sub .msg { min-height: 1.6em; font-size: 16px; color: #F0E4CB; }
+.sub .msg.err { color: #FFD3C7; font-weight: 600; }
+.sub .msg a { color: var(--gold); font-weight: 600; }
+
+/* Definition band */
+.def { background: var(--ink); color: var(--parch-light); }
+.def .wrap { padding-block: 60px; display: flex; flex-wrap: wrap; gap: 24px 64px; align-items: baseline; }
+.def .word { font-family: var(--display); font-size: clamp(40px, 5vw, 62px); font-style: italic; font-weight: 600; color: var(--gold); }
+.def .word small { display: block; font-family: var(--body); font-style: normal; font-size: 15px; letter-spacing: 0.14em; text-transform: uppercase; color: #CFC3AB; font-weight: 400; }
+.def p { flex: 1 1 420px; font-family: var(--display); font-size: clamp(24px, 2.6vw, 32px); line-height: 1.3; }
+
+/* Sections */
+section.block .wrap { padding-block: 84px; display: flex; flex-direction: column; gap: 44px; }
+.head { display: flex; flex-direction: column; gap: 12px; max-width: 36em; }
+.head h2 { font-size: clamp(36px, 4.2vw, 54px); }
+.head h2::after { content: ""; display: block; width: 96px; height: 6px; margin-top: 18px; border-block: 2px solid var(--red); }
+.dark .head h2::after { border-color: var(--gold); }
+
+/* Tabs */
+.board { background: var(--parch-light); border: 1px solid var(--stone); border-top: 6px solid var(--red); box-shadow: 0 18px 30px -24px rgba(27, 22, 18, 0.6); }
+.tabs { display: flex; flex-wrap: wrap; border-bottom: 1px solid var(--stone); }
+.tabs button { flex: 1 1 150px; min-height: 60px; padding: 14px 18px; font-family: var(--display); font-size: 24px; font-weight: 600; color: var(--ink); background: transparent; border: 0; border-bottom: 4px solid transparent; cursor: pointer; text-align: left; }
+.tabs button:hover { background: var(--parch); }
+.tabs button[aria-selected="true"] { background: var(--red); color: var(--parch-light); border-bottom-color: var(--gold); }
+.tabs button span { display: block; font-family: var(--body); font-size: 13px; letter-spacing: 0.2em; color: var(--red); font-weight: 600; }
+.tabs button[aria-selected="true"] span { color: var(--gold); }
+.panel { display: flex; flex-wrap: wrap; gap: 24px 56px; padding: 36px 32px 32px; }
+.panel[hidden] { display: none; }
+.panel > p { flex: 1 1 320px; font-size: 21px; max-width: 30em; }
+.panel ul { flex: 1 1 320px; margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; }
+.panel li { padding: 13px 0; border-top: 1px solid var(--stone); font-family: var(--display); font-size: 23px; font-style: italic; line-height: 1.25; }
+.panel .lab { font-family: var(--body); font-style: normal; font-size: 14px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--red); font-weight: 600; border-top: 0; padding: 0 0 10px; }
+
+/* Articles */
+.arts { background: linear-gradient(180deg, #231C16, var(--ink)); color: var(--parch-light); }
+.chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.chips button { min-height: 44px; padding: 8px 18px; font: inherit; font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--parch-light); background: transparent; border: 1px solid var(--gold); cursor: pointer; }
+.chips button:hover { background: #3A2F25; }
+.chips button[aria-pressed="true"] { background: var(--gold); color: var(--ink); font-weight: 600; }
+.chips[hidden] { display: none; }
+.mes { display: flex; flex-direction: column; gap: 18px; }
+.mes h3 { font-size: 28px; font-style: italic; color: var(--gold); padding-bottom: 10px; border-bottom: 1px solid var(--gold); }
+.art .autor { color: var(--text-soft); }
+.grid { display: flex; flex-wrap: wrap; gap: 24px; }
+.art { flex: 1 1 300px; display: flex; flex-direction: column; gap: 12px; padding: 28px; background: var(--parch-light); color: var(--ink); border-top: 6px solid var(--red); }
+.art[hidden] { display: none; }
+.art .meta { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 600; color: var(--red); }
+.art h3 { font-size: 30px; }
+.art .state { align-self: flex-start; font-size: 15px; color: var(--text-soft); border: 1px dashed var(--text-soft); padding: 2px 10px; }
+.none { font-family: var(--display); font-size: 24px; font-style: italic; }
+.none[hidden] { display: none; }
+
+/* Authors */
+.people { display: flex; flex-wrap: wrap; gap: 28px; }
+.person { flex: 1 1 280px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px; padding: 36px 28px 30px; background: var(--parch-light); border: 1px solid var(--stone); border-bottom: 6px solid var(--red); box-shadow: 0 18px 30px -24px rgba(27, 22, 18, 0.6); }
+.photo { width: 176px; height: 176px; border-radius: 50%; background: radial-gradient(circle at 50% 35%, #8E2A22, var(--red-deep)); border: 5px double var(--gold); outline: 6px solid var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: var(--gold); overflow: hidden; }
+.photo img { width: 100%; height: 100%; object-fit: cover; }
+.photo b { font-family: var(--display); font-size: 54px; font-weight: 600; letter-spacing: 0.06em; line-height: 1; }
+.photo small { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: #F0E4CB; }
+.person h3 { font-size: 30px; }
+.todo { font-size: 15px; color: var(--text-soft); border: 1px dashed var(--text-soft); padding: 4px 10px; }
+
+/* FAQ */
+.faq { display: flex; flex-direction: column; max-width: 46em; }
+.faq details { border-top: 1px solid var(--ink); }
+.faq details:last-child { border-bottom: 1px solid var(--ink); }
+.faq summary { cursor: pointer; padding: 20px 0; font-family: var(--display); font-size: 27px; font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 16px; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; color: var(--red); font-family: var(--body); font-weight: 400; }
+.faq details[open] summary::after { content: "\2212"; }
+.faq details p { padding: 0 0 22px; color: var(--text-soft); max-width: 38em; }
+
+/* Final call and footer */
+.final { background: radial-gradient(120% 120% at 80% 100%, #8E2A22 0%, var(--red) 50%, var(--red-deep) 100%); color: var(--parch-light); }
+.final .wrap { padding-block: 80px; display: flex; flex-wrap: wrap; gap: 36px 64px; align-items: center; }
+.final h2 { flex: 1 1 380px; font-size: clamp(38px, 4.6vw, 58px); }
+.final .sub { flex: 1 1 380px; }
+footer { background: var(--ink); color: #CFC3AB; font-size: 16px; }
+footer .wrap { padding-block: 30px; display: flex; flex-wrap: wrap; gap: 12px 32px; justify-content: space-between; align-items: center; }
+footer .brand { font-size: 24px; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#inicio" aria-label="Otium, inicio">OTIVM</a>
+    <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav">Menú</button>
+    <nav class="nav" id="nav" aria-label="Principal">
+      <a href="#temas">Temas</a>
+      <a href="#articulos">Artículos</a>
+      <a href="#firmas">Quiénes somos</a>
+      <a class="cta" href="#suscribirse">Suscribirse</a>
+    </nav>
+  </div>
+</header>
+
+<main id="inicio">
+  <section class="hero dark">
+    <div class="wrap">
+      <div class="hero-text">
+        <p class="inscr">Sapiens Recolectores · Cada semana</p>
+        <h1>Tres firmas. Tres artículos. <em>Cada semana.</em></h1>
+        <p class="lede">Cada uno de nosotros publica un artículo semanal sobre lo que le ocupa: geopolítica, política, economía, actualidad u ocio.</p>
+        <form class="sub" id="form-inicio" novalidate>
+          <label for="correo-inicio">Correo electrónico</label>
+          <div class="sub-row">
+            <input id="correo-inicio" name="correo" type="email" autocomplete="email" placeholder="nombre@correo.es" required>
+            <button type="submit">Suscribirme</button>
+          </div>
+          <p class="msg" id="msg-inicio" role="status" aria-live="polite">Gratuita.</p>
+        </form>
+      </div>
+
+      <aside class="temple" aria-label="Qué publicamos cada semana">
+        <div class="pediment" aria-hidden="true"><span></span></div>
+        <div class="entab">OTIVM · MMXXVI</div>
+        <div class="cella">
+          <div class="col" aria-hidden="true"><div class="shaft"></div></div>
+          <div class="sheet">
+            <h2>Cada semana, tres artículos</h2>
+            <ol>
+              <li><span class="n" aria-hidden="true">I</span><div><strong>Adrián Muñoz Rangil</strong><small>Un artículo de tema libre.</small></div></li>
+              <li><span class="n" aria-hidden="true">II</span><div><strong>Adrián Portomarín Castaño</strong><small>Un artículo de tema libre.</small></div></li>
+              <li><span class="n" aria-hidden="true">III</span><div><strong>Óscar del Palacio Gutiérrez</strong><small>Un artículo de tema libre.</small></div></li>
+            </ol>
+          </div>
+          <div class="col" aria-hidden="true"><div class="shaft"></div></div>
+        </div>
+        <div class="step" aria-hidden="true"></div>
+        <div class="step two" aria-hidden="true"></div>
+      </aside>
+    </div>
+  </section>
+
+  <div class="frieze" aria-hidden="true"></div>
+
+  <section class="def" aria-label="Qué significa otium">
+    <div class="wrap">
+      <div class="word">otium<small>latín · sustantivo neutro</small></div>
+      <p>Para los romanos, el tiempo libre de negocios que un ciudadano dedicaba a leer, pensar y conversar. Lo contrario era el <i>negotium</i>.</p>
+    </div>
+  </section>
+
+  <div class="frieze" aria-hidden="true"></div>
+
+  <section class="block tess" id="temas">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Temas</p>
+        <h2>De qué escribimos</h2>
+      </div>
+      <div class="board">
+        <div class="tabs" role="tablist" aria-label="Temas de la carta">
+          <button type="button" role="tab" id="tab-geo" aria-controls="panel-geo" aria-selected="true"><span>I</span>Geopolítica</button>
+          <button type="button" role="tab" id="tab-pol" aria-controls="panel-pol" aria-selected="false" tabindex="-1"><span>II</span>Política</button>
+          <button type="button" role="tab" id="tab-eco" aria-controls="panel-eco" aria-selected="false" tabindex="-1"><span>III</span>Economía</button>
+          <button type="button" role="tab" id="tab-act" aria-controls="panel-act" aria-selected="false" tabindex="-1"><span>IV</span>Actualidad</button>
+          <button type="button" role="tab" id="tab-vida" aria-controls="panel-vida" aria-selected="false" tabindex="-1"><span>V</span>Ocio</button>
+        </div>
+        <div class="panel" role="tabpanel" id="panel-geo" aria-labelledby="tab-geo">
+          <p class="soft">Potencias, alianzas, fronteras y conflictos. Qué se mueve en el mundo y qué supone para España y para Europa.</p>
+          <ul><li class="lab">Preguntas que nos hacemos</li><li>¿Quién gana y quién pierde con este acuerdo?</li><li>¿Qué papel le queda a Europa?</li><li>¿Cómo afecta esto al Mediterráneo?</li></ul>
+        </div>
+        <div class="panel" role="tabpanel" id="panel-pol" aria-labelledby="tab-pol" hidden>
+          <p class="soft">Instituciones, ley y orden, seguridad e inmigración. La vida pública vista desde el respeto a las normas.</p>
+          <ul><li class="lab">Preguntas que nos hacemos</li><li>¿Se cumple la ley o solo se anuncia?</li><li>¿Quién controla a quien gobierna?</li><li>¿Qué política migratoria puede sostener un país?</li></ul>
+        </div>
+        <div class="panel" role="tabpanel" id="panel-eco" aria-labelledby="tab-eco" hidden>
+          <p class="soft">Impuestos, empleo, empresa y mercados. Las cifras de la semana explicadas para quien trabaja y ahorra.</p>
+          <ul><li class="lab">Preguntas que nos hacemos</li><li>¿Quién paga esta medida?</li><li>¿Qué dice el dato y qué calla?</li><li>¿Cómo queda el que ahorra?</li></ul>
+        </div>
+        <div class="panel" role="tabpanel" id="panel-act" aria-labelledby="tab-act" hidden>
+          <p class="soft">Lo que ha dado que hablar esta semana, dentro y fuera de España, contado sin prisa.</p>
+          <ul><li class="lab">Preguntas que nos hacemos</li><li>¿Qué ha pasado de verdad?</li><li>¿Por qué importa?</li><li>¿Qué viene después?</li></ul>
+        </div>
+        <div class="panel" role="tabpanel" id="panel-vida" aria-labelledby="tab-vida" hidden>
+          <p class="soft">Gastronomía, vino, libros, historia y viajes. Lo mejor de la tradición mediterránea, porque no todo es política.</p>
+          <ul><li class="lab">Lo que recomendamos</li><li>Un libro para la semana.</li><li>Un restaurante o un vino que conocemos.</li><li>Un lugar al que volver.</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="frieze" aria-hidden="true"></div>
+
+  <section class="block arts dark" id="articulos">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Artículos</p>
+        <h2>La biblioteca</h2>
+        <p class="soft">Todos los artículos publicados. Puede verlos por fecha, del más reciente al más antiguo, o por tema.</p>
+      </div>
+      <div class="chips" role="group" aria-label="Cómo ordenar los artículos">
+        <button type="button" data-vista="fecha" aria-pressed="true">Por fecha</button>
+        <button type="button" data-vista="tema" aria-pressed="false">Por tema</button>
+      </div>
+      <div class="chips" id="chips-tema" role="group" aria-label="Filtrar artículos por tema" hidden>
+        <button type="button" data-filtro="todos" aria-pressed="true">Todos</button>
+        <button type="button" data-filtro="Geopolítica" aria-pressed="false">Geopolítica</button>
+        <button type="button" data-filtro="Política" aria-pressed="false">Política</button>
+        <button type="button" data-filtro="Economía" aria-pressed="false">Economía</button>
+        <button type="button" data-filtro="Actualidad" aria-pressed="false">Actualidad</button>
+        <button type="button" data-filtro="Ocio" aria-pressed="false">Ocio</button>
+      </div>
+      <div id="articulos-lista" style="display: flex; flex-direction: column; gap: 36px"></div>
+      <p class="none" id="articulos-vacio" hidden>Todavía no hay artículos de este tema.</p>
+      <p><a class="sub-link" href="https://otium3.substack.com/archive" target="_blank" rel="noopener">Ver el archivo en Substack</a></p>
+    </div>
+  </section>
+
+  <div class="frieze" aria-hidden="true"></div>
+
+  <section class="block tess" id="firmas">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Quiénes somos</p>
+        <h2>Tres amigos y una sobremesa que se alargó</h2>
+        <p class="soft">Nos llamamos Sapiens Recolectores y llevamos años discutiendo de política y de economía alrededor de una mesa. Otium es esa conversación, puesta por escrito.</p>
+      </div>
+      <div class="people">
+        <article class="person">
+          <div class="photo" role="img" aria-label="Espacio para la fotografía de Adrián Muñoz Rangil"><b>AM</b><small>Fotografía</small></div>
+          <h3>Adrián Muñoz Rangil</h3>
+          <p class="todo">Presentación por añadir</p>
+        </article>
+        <article class="person">
+          <div class="photo" role="img" aria-label="Espacio para la fotografía de Adrián Portomarín Castaño"><b>AP</b><small>Fotografía</small></div>
+          <h3>Adrián Portomarín Castaño</h3>
+          <p class="todo">Presentación por añadir</p>
+        </article>
+        <article class="person">
+          <div class="photo" role="img" aria-label="Espacio para la fotografía de Óscar del Palacio Gutiérrez"><b>ÓP</b><small>Fotografía</small></div>
+          <h3>Óscar del Palacio Gutiérrez</h3>
+          <p class="todo">Presentación por añadir</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <div class="frieze" aria-hidden="true"></div>
+
+  <section class="final dark" id="suscribirse">
+    <div class="wrap">
+      <h2>Reciba los artículos de cada semana en su correo.</h2>
+      <form class="sub" id="form-final" novalidate>
+        <label for="correo-final">Correo electrónico</label>
+        <div class="sub-row">
+          <input id="correo-final" name="correo" type="email" autocomplete="email" placeholder="nombre@correo.es" required>
+          <button type="submit">Suscribirme</button>
+        </div>
+        <p class="msg" id="msg-final" role="status" aria-live="polite">Gratuita.</p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span class="brand" aria-label="Otium">OTIVM</span>
+    <span>Una carta de Sapiens Recolectores.</span>
+    <a href="#inicio">Volver arriba</a>
+  </div>
+</footer>
+
+<script>
+/* Dirección de la newsletter en su plataforma (por ejemplo, "https://otium.substack.com").
+   Mientras esté vacía, el formulario valida el correo pero avisa de que aún no hay suscripciones. */
+var CONFIG = { subscribeUrl: "https://otium3.substack.com" };
+
+(function () {
+  // Menú en móvil
+  var btn = document.getElementById("menu-btn");
+  var nav = document.getElementById("nav");
+  btn.addEventListener("click", function () {
+    var open = nav.classList.toggle("open");
+    btn.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+  nav.addEventListener("click", function (e) {
+    if (e.target.tagName === "A") { nav.classList.remove("open"); btn.setAttribute("aria-expanded", "false"); }
+  });
+
+  // Pestañas de temas
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('[role="tab"]'));
+  function select(tab, focus) {
+    tabs.forEach(function (t) {
+      var on = t === tab;
+      t.setAttribute("aria-selected", on ? "true" : "false");
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
+    });
+    if (focus) tab.focus();
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener("click", function () { select(t, false); });
+    t.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowRight") { e.preventDefault(); select(tabs[(i + 1) % tabs.length], true); }
+      if (e.key === "ArrowLeft") { e.preventDefault(); select(tabs[(i - 1 + tabs.length) % tabs.length], true); }
+    });
+  });
+
+  // Filtro de artículos
+  // Cada artículo: titulo, autor, tema (Geopolítica, Política, Economía, Actualidad u Ocio) y fecha "AAAA-MM-DD".
+  // Las tres fichas de abajo son huecos hasta que se publique el primero.
+  var ARTICULOS = [
+    { titulo: "Nvidia se queda sin Jensen Huang", autor: "Otium", tema: "Economía", fecha: "2026-11-12", enlace: "https://otium3.substack.com/p/nvidia-se-queda-sin-jensen-huang" },
+    { titulo: "Primer artículo", autor: "Adrián Muñoz Rangil", tema: "", fecha: "" },
+    { titulo: "Primer artículo", autor: "Adrián Portomarín Castaño", tema: "", fecha: "" },
+    { titulo: "Primer artículo", autor: "Óscar del Palacio Gutiérrez", tema: "", fecha: "" }
+  ];
+  var lista = document.getElementById("articulos-lista");
+  var vacio = document.getElementById("articulos-vacio");
+  var chipsTema = document.getElementById("chips-tema");
+  var vista = "fecha";
+  var filtro = "todos";
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text) n.textContent = text;
+    return n;
+  }
+  function fechaLarga(iso) {
+    var d = new Date(iso + "T12:00:00");
+    return d.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
+  }
+  function mesDe(iso) {
+    var d = new Date(iso + "T12:00:00");
+    var s = d.toLocaleDateString("es-ES", { month: "long", year: "numeric" });
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+  function ficha(a) {
+    var card = el("article", "art");
+    var meta = el("div", "meta");
+    meta.appendChild(el("span", "", a.tema || "Tema libre"));
+    meta.appendChild(el("span", "", a.fecha ? fechaLarga(a.fecha) : "Fecha por fijar"));
+    card.appendChild(meta);
+    var h = el("h3", "", a.enlace ? "" : a.titulo);
+    if (a.enlace) {
+      var l = el("a", "", a.titulo);
+      l.href = a.enlace;
+      l.target = "_blank";
+      l.rel = "noopener";
+      h.appendChild(l);
+    }
+    card.appendChild(h);
+    card.appendChild(el("p", "autor", a.autor));
+    if (!a.fecha) card.appendChild(el("p", "state", "En preparación"));
+    return card;
+  }
+  function pintar() {
+    lista.textContent = "";
+    var items = ARTICULOS.filter(function (a) { return vista === "fecha" || filtro === "todos" || a.tema === filtro; });
+    items.sort(function (a, b) { return (b.fecha || "").localeCompare(a.fecha || ""); });
+    vacio.hidden = items.length > 0;
+    var grupos = [];
+    items.forEach(function (a) {
+      var nombre = a.fecha ? mesDe(a.fecha) : "Próximamente";
+      var g = grupos.filter(function (x) { return x.nombre === nombre; })[0];
+      if (!g) { g = { nombre: nombre, items: [] }; grupos.push(g); }
+      g.items.push(a);
+    });
+    grupos.forEach(function (g) {
+      var bloque = el("div", "mes");
+      if (vista === "fecha") bloque.appendChild(el("h3", "", g.nombre));
+      var grid = el("div", "grid");
+      g.items.forEach(function (a) { grid.appendChild(ficha(a)); });
+      bloque.appendChild(grid);
+      lista.appendChild(bloque);
+    });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll("[data-vista]"), function (b, i, all) {
+    b.addEventListener("click", function () {
+      vista = b.getAttribute("data-vista");
+      Array.prototype.forEach.call(all, function (o) { o.setAttribute("aria-pressed", o === b ? "true" : "false"); });
+      chipsTema.hidden = vista !== "tema";
+      pintar();
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-filtro]"), function (b, i, all) {
+    b.addEventListener("click", function () {
+      filtro = b.getAttribute("data-filtro");
+      Array.prototype.forEach.call(all, function (o) { o.setAttribute("aria-pressed", o === b ? "true" : "false"); });
+      pintar();
+    });
+  });
+  pintar();
+
+  // Suscripción
+  var EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  function bind(formId, inputId, msgId) {
+    var form = document.getElementById(formId);
+    var input = document.getElementById(inputId);
+    var msg = document.getElementById(msgId);
+    var destino = (CONFIG.subscribeUrl || "").replace(/\/+$/, "");
+    if (destino) {
+      // Con la publicación ya creada, el alta se hace en Substack: el formulario se sustituye por un enlace.
+      var enlace = document.createElement("a");
+      enlace.className = "sub-link";
+      enlace.href = destino + "/subscribe";
+      enlace.target = "_blank";
+      enlace.rel = "noopener";
+      enlace.textContent = "Suscribirme en Substack";
+      form.textContent = "";
+      form.appendChild(enlace);
+      var nota = document.createElement("p");
+      nota.className = "msg";
+      nota.textContent = "Gratuita. El alta se completa en Substack.";
+      form.appendChild(nota);
+      return;
+    }
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var email = input.value.trim();
+      msg.className = "msg";
+      msg.textContent = "";
+      if (!EMAIL.test(email)) {
+        msg.className = "msg err";
+        msg.textContent = "Escriba un correo válido, por ejemplo nombre@correo.es.";
+        input.setAttribute("aria-invalid", "true");
+        input.focus();
+        return;
+      }
+      input.removeAttribute("aria-invalid");
+      var base = (CONFIG.subscribeUrl || "").replace(/\/+$/, "");
+      if (base) {
+        var a = document.createElement("a");
+        a.href = base + "/subscribe?email=" + encodeURIComponent(email);
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.textContent = "Confirmar la suscripción";
+        msg.appendChild(document.createTextNode("Un paso más: "));
+        msg.appendChild(a);
+        msg.appendChild(document.createTextNode("."));
+      } else {
+        msg.textContent = "Las suscripciones se abren con la primera carta. Todavía no hemos guardado su correo.";
+      }
+    });
+  }
+  bind("form-inicio", "correo-inicio", "msg-inicio");
+  bind("form-final", "correo-final", "msg-final");
+})();
+</script>
+</body>
+</html>
