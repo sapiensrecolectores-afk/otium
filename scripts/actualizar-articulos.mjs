@@ -60,23 +60,80 @@ function fechaIso(pubDate) {
   return d.toLocaleDateString("sv-SE", { timeZone: "Europe/Madrid" });
 }
 
-async function main() {
-  const res = await fetch(FEED, { headers: { "User-Agent": "Otium-web (GitHub Actions)" } });
-  if (!res.ok) throw new Error(`Substack respondió ${res.status}`);
-  const xml = await res.text();
+function articulo({ titulo, autor, categorias, subtitulo, fecha, enlace }) {
+  return {
+    titulo,
+    autor: AUTORES[sinAcentos(autor || "")] || autor || "Otium",
+    tema: temaDe(categorias, subtitulo),
+    fecha: fechaIso(fecha),
+    enlace: (enlace || "").split("?")[0],
+    subtitulo,
+  };
+}
 
-  const nuevos = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)].map(([, item]) => {
-    const subtitulo = texto(item, "description");
-    const autor = texto(item, "dc:creator");
-    return {
-      titulo: texto(item, "title"),
-      autor: AUTORES[sinAcentos(autor)] || autor || "Otium",
-      tema: temaDe(todos(item, "category"), subtitulo),
-      fecha: fechaIso(texto(item, "pubDate")),
-      enlace: texto(item, "link").split("?")[0],
-      subtitulo,
-    };
-  }).filter((a) => a.titulo && a.enlace);
+const NAVEGADOR = {
+  "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Safari/537.36",
+  "Accept": "application/rss+xml, application/xml, text/xml, */*",
+  "Accept-Language": "es-ES,es;q=0.9",
+};
+
+// Fuente 1: el feed RSS directo de Substack.
+async function desdeFeed() {
+  const res = await fetch(FEED, { headers: NAVEGADOR });
+  if (!res.ok) throw new Error(`feed de Substack: ${res.status}`);
+  const xml = await res.text();
+  return [...xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)].map(([, item]) => articulo({
+    titulo: texto(item, "title"),
+    autor: texto(item, "dc:creator"),
+    categorias: todos(item, "category"),
+    subtitulo: texto(item, "description"),
+    fecha: texto(item, "pubDate"),
+    enlace: texto(item, "link"),
+  }));
+}
+
+// Fuente 2: la API pública del archivo de Substack.
+async function desdeArchivo() {
+  const base = new URL(FEED).origin;
+  const res = await fetch(`${base}/api/v1/archive?sort=new&limit=50`, { headers: { ...NAVEGADOR, Accept: "application/json" } });
+  if (!res.ok) throw new Error(`archivo de Substack: ${res.status}`);
+  return (await res.json()).map((p) => articulo({
+    titulo: p.title,
+    autor: (p.publishedBylines || [])[0]?.name,
+    categorias: [p.section_name, ...(p.postTags || []).map((t) => t.name)].filter(Boolean),
+    subtitulo: p.subtitle || p.description || "",
+    fecha: p.post_date,
+    enlace: p.canonical_url,
+  }));
+}
+
+// Fuente 3: rss2json, un servicio gratuito que lee el feed desde otros servidores.
+async function desdeRss2json() {
+  const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(FEED)}`);
+  const datos = await res.json();
+  if (datos.status !== "ok") throw new Error(`rss2json: ${datos.message || res.status}`);
+  return datos.items.map((i) => articulo({
+    titulo: limpiar(i.title || ""),
+    autor: i.author,
+    categorias: i.categories || [],
+    subtitulo: limpiar(i.description || "").slice(0, 300),
+    fecha: (i.pubDate || "").replace(" ", "T") + "Z",
+    enlace: i.link,
+  }));
+}
+
+async function main() {
+  let nuevos = null;
+  for (const fuente of [desdeFeed, desdeArchivo, desdeRss2json]) {
+    try {
+      nuevos = (await fuente()).filter((a) => a.titulo && a.enlace);
+      console.log(`Leído con ${fuente.name}: ${nuevos.length} artículos.`);
+      break;
+    } catch (e) {
+      console.log(`No se pudo con ${fuente.name} (${e.message}).`);
+    }
+  }
+  if (!nuevos) throw new Error("Ninguna fuente respondió. Se mantiene la lista actual.");
 
   let actuales = [];
   try { actuales = JSON.parse(await readFile(SALIDA, "utf8")); } catch { /* primera vez */ }
