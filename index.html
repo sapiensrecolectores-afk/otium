@@ -399,15 +399,22 @@ var CONFIG = { subscribeUrl: "https://otium3.substack.com" };
     });
   });
 
-  // Filtro de artículos
-  // Cada artículo: titulo, autor, tema (Geopolítica, Política, Economía, Actualidad u Ocio) y fecha "AAAA-MM-DD".
-  // Las tres fichas de abajo son huecos hasta que se publique el primero.
-  var ARTICULOS = [
-    { titulo: "Nvidia se queda sin Jensen Huang", autor: "Otium", tema: "Economía", fecha: "2026-11-12", enlace: "https://otium3.substack.com/p/nvidia-se-queda-sin-jensen-huang" },
-    { titulo: "Primer artículo", autor: "Adrián Muñoz Rangil", tema: "", fecha: "" },
-    { titulo: "Primer artículo", autor: "Adrián Portomarín Castaño", tema: "", fecha: "" },
-    { titulo: "Primer artículo", autor: "Óscar del Palacio Gutiérrez", tema: "", fecha: "" }
+  // Artículos
+  // Se cargan solos desde articulos.json, que GitHub Actions actualiza cada hora leyendo el feed de Substack.
+  // Esta lista solo se usa si el archivo no se puede cargar.
+  var RESPALDO = [
+    { titulo: "Nvidia se queda sin Jensen Huang", autor: "Otium", tema: "Economía", fecha: "2026-11-12", enlace: "https://otium3.substack.com/p/nvidia-se-queda-sin-jensen-huang" }
   ];
+  // Mientras alguno de los tres no haya firmado su primer artículo, se muestra un hueco "En preparación".
+  var FIRMAS = ["Adrián Muñoz Rangil", "Adrián Portomarín Castaño", "Óscar del Palacio Gutiérrez"];
+  var ARTICULOS = [];
+  function cargar(lista) {
+    ARTICULOS = lista.slice();
+    FIRMAS.forEach(function (f) {
+      if (!lista.some(function (a) { return a.autor === f; })) ARTICULOS.push({ titulo: "Primer artículo", autor: f, tema: "", fecha: "" });
+    });
+    pintar();
+  }
   var lista = document.getElementById("articulos-lista");
   var vacio = document.getElementById("articulos-vacio");
   var chipsTema = document.getElementById("chips-tema");
@@ -484,7 +491,11 @@ var CONFIG = { subscribeUrl: "https://otium3.substack.com" };
       pintar();
     });
   });
-  pintar();
+  cargar(RESPALDO);
+  fetch("articulos.json", { cache: "no-cache" })
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function (lista) { if (Array.isArray(lista) && lista.length) cargar(lista); })
+    .catch(function () { /* se queda la lista de respaldo */ });
 
   // Suscripción
   var EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;

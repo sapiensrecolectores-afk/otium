@@ -1,0 +1,38 @@
+name: Actualizar artículos desde Substack
+
+on:
+  schedule:
+    - cron: "17 * * * *"   # cada hora, al minuto 17
+  workflow_dispatch:        # botón "Run workflow" para lanzarlo a mano
+
+permissions:
+  contents: write
+
+concurrency:
+  group: actualizar-articulos
+  cancel-in-progress: false
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Leer el feed de Substack
+        run: node scripts/actualizar-articulos.mjs
+
+      - name: Guardar cambios
+        run: |
+          if git diff --quiet -- articulos.json && git ls-files --error-unmatch articulos.json >/dev/null 2>&1; then
+            echo "No hay artículos nuevos."
+            exit 0
+          fi
+          git config user.name "otium-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add articulos.json
+          git commit -m "Artículos actualizados desde Substack"
+          git push
